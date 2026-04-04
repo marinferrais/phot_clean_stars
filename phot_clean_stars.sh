@@ -52,19 +52,12 @@ Use something else than PP to get the instru mag?
 COMMENT_BLOCK
 
 #
-# Scripts directories (modify as needed) ######################################
-#
-SCR_DIR=$HOME/Dropbox/phot_codes
-PP_DIR=$HOME/Softwares/photometrypipeline
-
-
-#
 # #############################################################################
 #
 set -e  # stop script on errors
 
 # Print outputs to both stdout and logfile.
-LOG_FILE="phot_median_subtraction.out"
+LOG_FILE="phot_star_clean.out"
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec > >(tee -a "$LOG_FILE") 2>&1  
@@ -73,7 +66,7 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 #
 # Args default values #########################################################
 #
-FITS_FILES=("*.20??-??-??T??:??:??.fits") # List of FITS files (dont forget the quotes)
+FITS_FILES=("*.fits") # List of FITS files (dont forget the quotes)
 SOLAR=        # solar mode for PP
 APRAD=3.5     # PP photometry aperture
 APRAD_TAR=    # PP photometry aperture for the target only
@@ -277,28 +270,28 @@ echo $PHO_INSTRU
 
 # Run PP on original images, unless skipped # TODO: find out why it messes with the console output ?
 if [[ "$SKIP_PP" == false && -z "$FILTER" ]]; then
-  $PP_DIR/pp_run $FITS_FILES -fixed_aprad $APRAD -target $TARGET $SOLAR
+  pp_run $FITS_FILES -fixed_aprad $APRAD -target $TARGET $SOLAR
 elif [[ "$SKIP_PP" == false ]]; then
-  $PP_DIR/pp_run $FITS_FILES -fixed_aprad $APRAD -target $TARGET -filter $FILTER $SOLAR
+  pp_run $FITS_FILES -fixed_aprad $APRAD -target $TARGET -filter $FILTER $SOLAR
 else
   echo "> Initial pp run skipped (be patient, console output is lagging behind)"
 fi
 
 # Create gif of original images
 if [[ -z "$GIFPOSX" || -z "$GIFPOSY" ]]; then
-  $SCR_DIR/gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_OBS -wt -sctype $SCALING_TYPE
+  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_OBS -wt -sctype $SCALING_TYPE
 else
-  $SCR_DIR/gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_OBS -wt -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
+  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_OBS -wt -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
 fi
 
 # Create median subtracted images (residuals) to remove stars
-$SCR_DIR/fits_rolling_median_subtraction_PP.py $FITS_FILES -k $K -km -p $PAD $VERBOSE 
+fits_rolling_median_subtraction_PP.py $FITS_FILES -k $K -km -p $PAD $VERBOSE 
 
 # Create gif of the median frames
 if [[ -z "$GIFPOSX" || -z "$GIFPOSY" ]]; then
-  $SCR_DIR/gif_maker.py medians/*_median.fits -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_MED  -sctype $SCALING_TYPE
+  gif_maker.py medians/*_median.fits -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_MED  -sctype $SCALING_TYPE
 else
-  $SCR_DIR/gif_maker.py medians/*_median.fits -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_MED -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
+  gif_maker.py medians/*_median.fits -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_MED -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
 fi
 
 # Remove medians frames to save disk space
@@ -309,18 +302,18 @@ cd residuals/
 
 # Create gif of the median subtracted images (residuals)
 if [[ -z "$GIFPOSX" || -z "$GIFPOSY" ]]; then
-  $SCR_DIR/gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES -sctype $SCALING_TYPE
+  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES -sctype $SCALING_TYPE
 else
-  $SCR_DIR/gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
+  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
 fi
 
 # Reproject the residual frames on the original images for comparison purposes, unless skipped
 if [[ "$REPROJ" == true ]]; then
-  $SCR_DIR/fits_reproject.py ../$FITS_FILES -f2 $FITS_FILES -s
+  fits_reproject.py ../$FITS_FILES -f2 $FITS_FILES -s
   if [[ -z "$GIFPOSX" || -z "$GIFPOSY" ]]; then
-    $SCR_DIR/gif_maker.py reprojected/$FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -sctype $SCALING_TYPE
+    gif_maker.py reprojected/$FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -sctype $SCALING_TYPE
   else
-    $SCR_DIR/gif_maker.py reprojected/$FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
+    gif_maker.py reprojected/$FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
   fi
   ffmpeg -y -i $GIF_OBS -i $GIF_RES_RPRJ -filter_complex '[0]scale=-1:-1[a];[1]scale=-1:-1[b];[a][b]hstack' $GIF_RES_COMPA
   rm -r reprojected
@@ -333,24 +326,24 @@ fi
 #
 
 # Fits preparation. We keep the WCS (it is not used after)
-$PP_DIR/pp_prepare $FITS_FILES -keep_wcs 
+pp_prepare $FITS_FILES -keep_wcs 
 
 # Photometry with fixed aperture size
-$PP_DIR/pp_photometry.py $FITS_FILES -aprad $APRAD_TAR
+pp_photometry.py $FITS_FILES -aprad $APRAD_TAR
 
 # Writing instrumental mags to database
-$PP_DIR/pp_calibrate $FITS_FILES -instrumental
+pp_calibrate $FITS_FILES -instrumental
 
 # Manual identification of the target : a and d to browse images, q to quit
-$PP_DIR/pp_manident $FITS_FILES -zoom $ZOOM
+pp_manident $FITS_FILES -zoom $ZOOM
 
 # Extract photometry from the manual positions
-$PP_DIR/pp_distill $FITS_FILES -mf $MAXFLAG -target manual -positions $WRK_DIR/residuals/positions.dat
+pp_distill $FITS_FILES -mf $MAXFLAG -target manual -positions $WRK_DIR/residuals/positions.dat
 
 
 # Combine ZP from original images with instrumental mags from residual fromes
-$SCR_DIR/pp_instru-zp.py $PHO_INSTRU -zp $PHO_ZP -v -o $OBS_MEDSUB -t $TARGETNAME
-$SCR_DIR/obs2dat.py $OBS_MEDSUB -s
+pp_instru-zp.py $PHO_INSTRU -zp $PHO_ZP -v -o $OBS_MEDSUB -t $TARGETNAME
+obs2dat.py $OBS_MEDSUB -s
 
 # Create lightcurve gif
 GIF_LC_SZ=$(($((GIFSZ * 2)) / 100 )) # lc figure width is 2 times the gifs size
