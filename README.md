@@ -28,7 +28,6 @@ sudo pacman -S ffmpeg
 1. Clone the repository:
 ```bash
 git clone https://github.com/marinferrais/phot_clean_stars
-cd phot_clean_stars
 ```
 
 2. Install dependencies in the same conda env than PP (here pp):
@@ -74,6 +73,11 @@ Some are related to the star cleaning:
 ```text
 -k # number of images to use in the median
 -p # number of images before of after not used in the median, very important for slow targets
+```
+
+Some are related to the manual identification:
+```text
+-z # image zoom for the manual identification
 ```
 
 To not redo an existing PP run use:

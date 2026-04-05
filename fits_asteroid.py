@@ -71,7 +71,8 @@ def telescop2IAU(telescope): #TODO: put in toolbox
                       'C2PU/Omicron':'Omicron',
                       'Spacewatch-0.9m':'SW09m',
                       'Spacewatch 0.9-m f/3 prime focus':'SW09m',
-                      'Robinson':'RO'
+                      'Robinson_Mono':'RO',
+                      'Robinson':'RO',
                       }
     
     IAUlist = {'TN':'Z53', 'TS':'I40', 'MOSS':'J43', 'SSO2':'309', 'SNO1':'Z25',

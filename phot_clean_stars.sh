@@ -2,9 +2,9 @@
 
  <<'COMMENT_BLOCK'
 
-PHOT_MEDIAN_SUBTRACTION - This script improves photometry in crowded field by 
-                          subtracting median images to each images to limit star
-                          contamination.
+PHOT_CLEAN_STARS - This script improves photometry in crowded field by
+                   subtracting median images to each images to limit star
+                   contamination.
     
     author: marin ferrais
     creation : AUG 2025
