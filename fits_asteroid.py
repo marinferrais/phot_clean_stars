@@ -73,6 +73,7 @@ def telescop2IAU(telescope): #TODO: put in toolbox
                       'Spacewatch 0.9-m f/3 prime focus':'SW09m',
                       'Robinson_Mono':'RO',
                       'Robinson':'RO',
+                      'RCOS':'RO',
                       }
     
     IAUlist = {'TN':'Z53', 'TS':'I40', 'MOSS':'J43', 'SSO2':'309', 'SNO1':'Z25',
