@@ -304,7 +304,7 @@ def make_gif(fnames, destination, filename, gif_factor=0.25, z=0.05, delay=0.2,
     else:
         data_list_scaled = [data for data in data_list_resized]
 
-    with imageio.get_writer(gif_path, mode="I", duration=delay) as writer:
+    with imageio.get_writer(gif_path, mode="I", fps=1/delay, loop=0) as writer:
         for data in data_list_scaled:
             data = np.flip(data, axis=0) # Flip y  TODO: take care of meridian flip
             writer.append_data((data * 255).astype("uint8"))

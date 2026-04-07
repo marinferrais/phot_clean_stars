@@ -12,8 +12,8 @@
 # Command line arguments parser
 import argparse
 
-# Numerical computing
-import numpy as np
+# Filesytem paths
+from pathlib import Path
 
 # astropy
 from astropy.io import fits
