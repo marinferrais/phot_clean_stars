@@ -170,10 +170,10 @@ def gif_text(gif_path, fits_infos_list, pos=None,
         d = ImageDraw.Draw(frame)
         txtoff = 0.03 * im.size[1]  # text offset from the borders in px
 
-        d.text((im.size[0]//2, txtoff), target, font=font2, anchor='mm')
-        d.text((txtoff, im.size[1]-txtoff), telescope, font=font, anchor='lm')
-        d.text((im.size[0]-txtoff, im.size[1]-txtoff), date[i], font=font, anchor='rm')
-        d.text((im.size[0]-txtoff, im.size[1]-2*txtoff), f"{i+1} / {n}", font=font, anchor='rm')
+        d.text((im.size[0]//2, txtoff), target, font=font2, anchor='mm', fill="white")
+        d.text((txtoff, im.size[1]-txtoff), telescope, font=font, anchor='lm', fill="white")
+        d.text((im.size[0]-txtoff, im.size[1]-txtoff), date[i], font=font, anchor='rm', fill="white")
+        d.text((im.size[0]-txtoff, im.size[1]-2*txtoff), f"{i+1} / {n}", font=font, anchor='rm', fill="white")
 
         
         if len(pos) > 0:
