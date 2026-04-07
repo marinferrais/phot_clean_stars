@@ -259,7 +259,7 @@ if __name__ == '__main__':
 
     # matplotlib style
     try:
-        plt.style.use('bmh.mplstyle')
+        plt.style.use(Path(__file__).resolve().parent/"bmh.mplstyle")
     except OSError:
         print('Custom matplotlib style file not found -> use default')
 
