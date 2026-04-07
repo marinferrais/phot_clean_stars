@@ -274,7 +274,7 @@ if [[ "$SKIP_PP" == false && -z "$FILTER" ]]; then
 elif [[ "$SKIP_PP" == false ]]; then
   pp_run $FITS_FILES -fixed_aprad $APRAD -target $TARGET -filter $FILTER $SOLAR
 else
-  echo "> Initial pp run skipped (be patient, console output is lagging behind)"
+  echo "> Initial pp run skipped"
 fi
 
 # Create gif of original images

@@ -33,7 +33,8 @@ def combine_instru_zp(file_instru, file_zp, outfile='', targetname=None,
         targetname = str(file_zp.absolute().parent.name).split('_')[0]
     
     if not file_zp.exists():
-        file_zp = list(file_zp.parent.glob(f'photometry_*{targetname[:4]}_{targetname[4:]}_.dat'))[0]
+        #file_zp = list(file_zp.parent.glob(f'photometry_*{targetname[:4]}_{targetname[4:]}_.dat'))[0]
+        file_zp = list(file_zp.parent.glob(f'photometry_*_.dat'))[0]
         if not file_zp.exists():
             raise FileNotFoundError(f"[Errno 2] No such file or directory: {file_zp}")
 
