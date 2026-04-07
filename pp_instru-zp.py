@@ -39,8 +39,8 @@ def combine_instru_zp(file_instru, file_zp, outfile='', targetname=None,
             raise FileNotFoundError(f"[Errno 2] No such file or directory: {file_zp}")
 
 
-    obs_code = {'TRAPPIST' : 'I40', 'ACP->NTM': 'Z53', 'Artemis':'Z25', 'ACP->Artemis':'Z25', 'Spacewatch_0.9-m_f/3_prime_focus':'691'}
-    obs_abrv = {'TRAPPIST' : 'TS', 'ACP->NTM': 'TN', 'Artemis':'SNO1', 'ACP->Artemis':'SNO1', 'Spacewatch_0.9-m_f/3_prime_focus':'SW09m'}
+    obs_code = {'TRAPPIST' : 'I40', 'ACP->NTM': 'Z53', 'Artemis':'Z25', 'ACP->Artemis':'Z25', 'Spacewatch_0.9-m_f/3_prime_focus':'691', 'RCOS':'W39'}
+    obs_abrv = {'TRAPPIST' : 'TS', 'ACP->NTM': 'TN', 'Artemis':'SNO1', 'ACP->Artemis':'SNO1', 'Spacewatch_0.9-m_f/3_prime_focus':'SW09m', 'RCOS':'RO'}
 
     # Load PP photometry file with instrumental mags
     t_in = Table.read(file_instru, format='ascii.commented_header')
