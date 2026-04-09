@@ -315,7 +315,8 @@ def make_gif(fnames, destination, filename, gif_factor=0.25, z=0.05, delay=0.2,
         gif_path,
         save_all=True,
         append_images=frames[1:],
-        fps=1/(delay*1000),
+        #fps=1/(delay*1000),
+        duration=delay*1000, # duration is in ms
         loop=0,
         optimize=True    # additional size optimization
     )
