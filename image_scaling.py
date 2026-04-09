@@ -1,4 +1,4 @@
-#!/usr/bin/python3.7
+#!/usr/bin/env python3
 
 """ IMAGE_SCALING - Routines for image scaling for visualisation
     creation : marin ferrais - APR 2022
