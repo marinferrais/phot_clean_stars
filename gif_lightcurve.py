@@ -124,7 +124,7 @@ def create_magnitude_gif(obsfiles, gifname='lightcurve.gif', delay=0.2, size=6):
         plt.close(fig)
 
     # Save to GIF
-    imageio.mimsave(gifname, frames, fps=1/delay, loop=0)
+    imageio.mimsave(gifname, frames, fps=1/delay, loop=0, optimize=True)
     print(f"> Saving GIF to {gifname}")
 #
 # --- ARGS PARSER -------------------------------------------------------------
