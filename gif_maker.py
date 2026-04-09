@@ -193,8 +193,11 @@ def gif_text(gif_path, fits_infos_list, pos=None,
         frame = Image.open(b)
         #frame = ImageOps.flip(frame)
         frames.append(frame)
+    # Quantize to reduced palette
+    frames = [f.quantize(colors=16, method=Image.Quantize.MAXCOVERAGE) 
+                  for f in frames]
     # Save the frames as a new image
-    frames[0].save(gif_path, save_all=True, append_images=frames[1:])
+    frames[0].save(gif_path, save_all=True, append_images=frames[1:], optimize=True)
 
 
 
@@ -304,10 +307,21 @@ def make_gif(fnames, destination, filename, gif_factor=0.25, z=0.05, delay=0.2,
     else:
         data_list_scaled = [data for data in data_list_resized]
 
-    with imageio.get_writer(gif_path, mode="I", fps=1/delay, loop=0) as writer:
-        for data in data_list_scaled:
-            data = np.flip(data, axis=0) # Flip y  TODO: take care of meridian flip
-            writer.append_data((data * 255).astype("uint8"))
+    data_list = [np.flip(data, axis=0) for data in data_list_scaled]
+    data_list = [(data * 255).astype("uint8") for data in data_list]
+    frames = [Image.fromarray(data) for data in data_list]
+    # Quantize to reduced palette
+    frames = [f.quantize(colors=16, method=Image.Quantize.MAXCOVERAGE) 
+                  for f in frames]
+    # Save the frames as a new image
+    frames[0].save(
+        gif_path,
+        save_all=True,
+        append_images=frames[1:],
+        fps=1/(delay*1000),
+        loop=0,
+        optimize=True    # additional size optimization
+    )
     
     if write_text:
         pos_list = np.array(pos_list) * gif_factor
