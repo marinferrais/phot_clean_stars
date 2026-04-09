@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-from astropy.io import fits
 from astropy.coordinates import SkyCoord
 from astropy.wcs import WCS
 
-import imageio
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageSequence, ImageFont
+import io
+from jd2ut import jd2ut
 from skimage.transform import resize
 from tqdm import tqdm
 import numpy as np
@@ -117,9 +117,6 @@ def arrowedLine(draw, ptA, ptB, width=1, color=(0,255,0)):
 def gif_text(gif_path, fits_infos_list, pos=None,
              target_width_ratio = 0.4,
              font_path="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"):
-    from PIL import Image, ImageDraw, ImageSequence, ImageFont
-    import io
-    from jd2ut import jd2ut
 
     im = Image.open(gif_path)
 
@@ -318,7 +315,7 @@ def make_gif(fnames, destination, filename, gif_factor=0.25, z=0.05, delay=0.2,
         gif_path,
         save_all=True,
         append_images=frames[1:],
-        fps=1/delay,
+        fps=1/(delay*1000),
         loop=0,
         optimize=True    # additional size optimization
     )
