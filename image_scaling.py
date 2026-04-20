@@ -16,7 +16,6 @@
 def z_scale(data, c=0.05, verbose=False, return_limits=False):
     """
     Z scaling of astronomical image
-
     Parameters
     ----------
     data : array, required
@@ -27,14 +26,25 @@ def z_scale(data, c=0.05, verbose=False, return_limits=False):
         Print interval values
     """
     from astropy.visualization import ZScaleInterval
+    import numpy as np
+
     interval = ZScaleInterval(contrast=c)
-    limits = interval.get_limits(data)
+
+    # Compute limits ignoring zero pixels
+    non_zero = data[data != 0.0]
+    limits = interval.get_limits(non_zero)
+
     if verbose:
         print(limits)
+
+    # Apply limits to full data
+    vmin, vmax = limits
+    scaled = np.clip((data - vmin) / (vmax - vmin), 0, 1)
+
     if return_limits:
-        return interval(data.copy()), limits
+        return scaled, limits
     else:
-        return interval(data.copy())
+        return scaled
 
 def minmax_scale(data, verbose=False):
     """
