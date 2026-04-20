@@ -135,7 +135,7 @@ def gif_text(gif_path, fits_infos_list, pos=None,
                  'Z25': 'Artemis', '691':'Spacewatch-0.9m',
                  'W39':'Robinson Observatory',
                  }
-    telescope = code2name[fits_infos_list[0][1]]
+    telescope = code2name.get(fits_infos_list[0][1], fits_infos_list[0][1])
 
     date = np.array(fits_infos_list)[:,2]
     n = len(date)
