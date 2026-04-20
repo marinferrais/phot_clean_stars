@@ -82,7 +82,7 @@ def telescop2IAU(telescope): #TODO: put in toolbox
            }
     
     #return IAUlist[tele_translate[telescope]]
-    return tel2code(tele_translate[telescope])
+    return tel2code(tele_translate.get(telescope, telescope))
 
 def fix_header(header):
     try:
