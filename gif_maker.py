@@ -197,9 +197,39 @@ def gif_text(gif_path, fits_infos_list, pos=None,
     frames[0].save(gif_path, save_all=True, append_images=frames[1:], optimize=True)
 
 
+def add_circles(gif_path, pos, aprad=7):
+    from PIL import Image, ImageDraw, ImageSequence, ImageFont
+    import io
+
+    im = Image.open(gif_path)
+
+    # A list of the frames to be outputted
+    frames = []
+    r = aprad
+    # # Loop over each frame in the animated image
+    for i,frame in enumerate(ImageSequence.Iterator(im)):
+        d = ImageDraw.Draw(frame)
+        x, y = pos[i][0], pos[i][1]
+        d.ellipse(
+            [x - r, y - r, x + r, y + r],
+            outline="dodgerblue",
+            width=1
+            )
+        del d
+
+        b = io.BytesIO()
+        frame.save(b, format="GIF")
+        frame = Image.open(b)
+        frames.append(frame)
+    # Quantize to reduced palette
+    frames = [f.quantize(colors=16, method=Image.Quantize.MAXCOVERAGE) 
+                  for f in frames]
+    # Save the frames as a new image
+    frames[0].save(gif_path, save_all=True, append_images=frames[1:], optimize=True)
+
 
 def get_images(fnames, size=None, position=None, coordinates=None, bkgsub=False,
-               get_ast_pos=True):
+               get_ast_pos=True, file_ap_pos=None):
     """
     """
 
@@ -213,7 +243,15 @@ def get_images(fnames, size=None, position=None, coordinates=None, bkgsub=False,
             ra = 15*(ra[0] + ra[1]/60 + ra[2]/3600)
             dec = dec[0] + dec[1]/60 + dec[2]/3600
 
+    if file_ap_pos:
+        ap_coord = np.genfromtxt(file_ap_pos, dtype=[('filename', 'S50'),
+                                                    ('ra', float),
+                                                    ('dec', float),
+                                                    ('MJD', float)],
+                                                    names=True)
+
     get_pos = False
+    ap_pos_list = []
     for fname in tqdm(fnames):
         data, header, fits_infos = get_fits_infos(fname)
         wcs = WCS(header)
@@ -252,16 +290,22 @@ def get_images(fnames, size=None, position=None, coordinates=None, bkgsub=False,
             if not size:
                 size = data.shape
             data = cropping(data, size=size, position=pos, wcs=wcs, display=False)
-        
+
+        if file_ap_pos:
+            x_ap, y_ap = wcs.world_to_pixel(SkyCoord(ra=ap_coord['RA'][i], dec=ap_coord['Dec'][i], unit="deg"))
+            y_ap = data.shape[0] - y_ap
+            ap_pos_list.append([x_ap, y_ap])  
+              
         data_list.append(data)
         fits_infos_list.append(fits_infos)
 
-    return data_list, fits_infos_list, pos_ast_list
+    return data_list, fits_infos_list, pos_ast_list, ap_pos_list
 
 
 def make_gif(fnames, destination, filename, gif_factor=0.25, z=0.05, delay=0.2,
                  size=None, position=None, coordinates=None, bkgsub=False,
-                 write_text=False, scaling_type='zscale', get_ast_pos=True):
+                 write_text=False, scaling_type='zscale', get_ast_pos=True,
+                 file_ap_pos=None, aprad=7):
     """
     """
     folder_exist(destination)
@@ -276,7 +320,7 @@ def make_gif(fnames, destination, filename, gif_factor=0.25, z=0.05, delay=0.2,
     get_images_res = get_images(fnames,
                                 size=size, position=position, coordinates=coordinates,
                                 bkgsub=bkgsub, get_ast_pos=get_ast_pos)
-    data_list, fits_infos_list, pos_list = get_images_res
+    data_list, fits_infos_list, pos_list, ap_pos_list = get_images_res
 
     data_list_resized = [resize(data, (np.array(np.shape(data)) * gif_factor).astype(int), anti_aliasing=True)
                                 for data in data_list]
@@ -325,6 +369,9 @@ def make_gif(fnames, destination, filename, gif_factor=0.25, z=0.05, delay=0.2,
         pos_list = np.array(pos_list) * gif_factor
         gif_text(gif_path, fits_infos_list, pos=pos_list)
     
+    if file_ap_pos:
+        add_circles(gif_path, ap_pos_list, aprad=aprad)
+    
     print(f"> Gif saved to {gif_path}")
 
 if __name__ == '__main__':
@@ -367,6 +414,10 @@ if __name__ == '__main__':
                         help='Type of image scaling to use',
                         choices=['zscale', 'zscale_uni', 'uni_perct'],
                         default='zscale')
+    parser.add_argument("-app", "--file_ap_pos", help='output gif name',
+                        default="mygif", type=str)
+    parser.add_argument("-aprad", "--aprad", help='Photometric aperture radius',
+                        default=7, type=float)
 
 
     args = parser.parse_args()
@@ -388,6 +439,9 @@ if __name__ == '__main__':
     stack = args.stack
     write_text = args.write_text
 
+    file_ap_pos = args.file_ap_pos
+    aprad = args.aprad
+
     if no_warnings:
         import warnings
         from astropy.utils.exceptions import AstropyWarning
@@ -408,4 +462,6 @@ if __name__ == '__main__':
                      get_ast_pos=True, # TODO put in args cmd line
                      scaling_type=scaling_type,
                      #coordinates=[(21,32,22), (-0,-14,-29)]
+                     file_ap_pos=file_ap_pos,
+                     aprad=aprad
                      )
