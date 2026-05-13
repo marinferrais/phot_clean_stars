@@ -94,8 +94,12 @@ def cropping(data, size, position, wcs=None, display=False):
 
     if display:
         plot_cropping(data, size, position, wcs=wcs)
-
-    return cutout.data
+    
+    if wcs:
+        return cutout.data, cutout.wcs
+    else:
+        return cutout.data
+        
 
 
 def fits_cropping(fname,
@@ -122,7 +126,7 @@ def fits_cropping(fname,
         print(f'> Position = {position}')
         print(f'> Size = {size}')
 
-    cutout = cropping(data, size, position, wcs=wcs, display=display)
+    cutout, wcs = cropping(data, size, position, wcs=wcs, display=display)
         
     if save:
         # Indicate old file name in the header
