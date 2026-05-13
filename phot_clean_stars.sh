@@ -335,10 +335,11 @@ pp_photometry.py $FITS_FILES -aprad $APRAD_TAR
 pp_calibrate $FITS_FILES -instrumental
 
 # Manual identification of the target : a and d to browse images, q to quit
-pp_manident $FITS_FILES -zoom $ZOOM
+#pp_manident $FITS_FILES -zoom $ZOOM
 
-# Extract photometry from the manual positions
-pp_distill $FITS_FILES -mf $MAXFLAG -target manual -positions $WRK_DIR/residuals/positions.dat
+# Extract photometry from the original images positions
+POS_FILE=$WRK_DIR/positions.dat
+pp_distill $FITS_FILES -mf $MAXFLAG -target manual -positions $POS_FILE
 
 
 # Combine ZP from original images with instrumental mags from residual fromes
