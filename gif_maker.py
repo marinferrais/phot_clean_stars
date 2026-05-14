@@ -415,7 +415,7 @@ if __name__ == '__main__':
                         choices=['zscale', 'zscale_uni', 'uni_perct'],
                         default='zscale')
     parser.add_argument("-app", "--file_ap_pos", help='output gif name',
-                        default="mygif", type=str)
+                        default="", type=str)
     parser.add_argument("-aprad", "--aprad", help='Photometric aperture radius',
                         default=7, type=float)
 
