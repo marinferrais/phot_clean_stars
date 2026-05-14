@@ -74,7 +74,8 @@ FILTER=       # Filter to use for PP calibration (band), if not specified, calib
 K=6           # median selections windows size
 PAD=0         # median selections padding for slow targets
 VERBOSE=      # verbose mode for median selections
-GIFSZ=300     # gif px size
+IMGSZ=300     # image cutouts px size
+GIFSZ=500     # gif px size
 GIFDL=0.5     # gif delay between frames in seconds
 GIFPOSX=      # gif x center position in pixel
 GIFPOSY=      # gif y center position in pixel
@@ -125,7 +126,11 @@ while [[ $# -gt 0 ]]; do
       FILTER="$2"
       shift 2
       ;;
-    -sz|--gifsz)
+    -sz|--imgsz)
+      IMGSZ="$2"
+      shift 2
+      ;;
+    -gsz|--gifsz)
       GIFSZ="$2"
       shift 2
       ;;
@@ -236,6 +241,7 @@ echo "APRAD     =  "$APRAD
 echo "APRAD_TAR =  "$APRAD_TAR
 echo "FILTER    =  "$FILTER
 echo "# Gifs:"
+echo "IMGSZ     =  "$IMGSZ
 echo "GIFSZ     =  "$GIFSZ
 echo "GIFPOSX   =  "$GIFPOSX
 echo "GIFPOSY   =  "$GIFPOSY
@@ -280,9 +286,9 @@ fi
 POS_FILE=$WRK_DIR/positions.dat
 # Create gif of original images
 if [[ -z "$GIFPOSX" || -z "$GIFPOSY" ]]; then
-  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_OBS -wt -sctype $SCALING_TYPE -aprad $APRAD_TAR -app $POS_FILE
+  gif_maker.py $FITS_FILES -sz $IMGSZ -gsz $GIFSZ -dl $GIFDL -n $GIF_OBS -wt -sctype $SCALING_TYPE -aprad $APRAD -app $POS_FILE
 else
-  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_OBS -wt -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE -aprad $APRAD_TAR -app $POS_FILE
+  gif_maker.py $FITS_FILES -sz $IMGSZ -gsz $GIFSZ -dl $GIFDL -n $GIF_OBS -wt -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE -aprad $APRAD -app $POS_FILE
 fi
 
 # Create median subtracted images (residuals) to remove stars
@@ -290,9 +296,9 @@ fits_rolling_median_subtraction_PP.py $FITS_FILES -k $K -km -p $PAD $VERBOSE
 
 # Create gif of the median frames
 if [[ -z "$GIFPOSX" || -z "$GIFPOSY" ]]; then
-  gif_maker.py medians/*_median.fits -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_MED  -sctype $SCALING_TYPE
+  gif_maker.py medians/*_median.fits -sz $IMGSZ -gsz $GIFSZ -dl $GIFDL -n $GIF_MED  -sctype $SCALING_TYPE
 else
-  gif_maker.py medians/*_median.fits -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_MED -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
+  gif_maker.py medians/*_median.fits -sz $IMGSZ -gsz $GIFSZ -dl $GIFDL -n $GIF_MED -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
 fi
 
 # Remove medians frames to save disk space
@@ -303,20 +309,22 @@ cd residuals/
 
 # Create gif of the median subtracted images (residuals)
 if [[ -z "$GIFPOSX" || -z "$GIFPOSY" ]]; then
-  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES -sctype $SCALING_TYPE
+  gif_maker.py $FITS_FILES -sz $IMGSZ -gsz $GIFSZ -dl $GIFDL -d ../ -n $GIF_RES -sctype $SCALING_TYPE
 else
-  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
+  gif_maker.py $FITS_FILES -sz $IMGSZ -gsz $GIFSZ -dl $GIFDL -d ../ -n $GIF_RES -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
 fi
 
 # Reproject the residual frames on the original images for comparison purposes, unless skipped
 if [[ "$REPROJ" == true ]]; then
   fits_reproject.py ../$FITS_FILES -f2 $FITS_FILES -s
   if [[ -z "$GIFPOSX" || -z "$GIFPOSY" ]]; then
-    gif_maker.py reprojected/$FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -sctype $SCALING_TYPE -aprad $APRAD_TAR -app $POS_FILE
+    gif_maker.py reprojected/$FITS_FILES -sz $IMGSZ -gsz $GIFSZ -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -sctype $SCALING_TYPE -aprad $APRAD_TAR -app $POS_FILE
   else
-    gif_maker.py reprojected/$FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE -aprad $APRAD_TAR -app $POS_FILE
+    gif_maker.py reprojected/$FITS_FILES -sz $IMGSZ -gsz $GIFSZ -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE -aprad $APRAD_TAR -app $POS_FILE
   fi
-  ffmpeg -y -i $GIF_OBS -i $GIF_RES_RPRJ -filter_complex '[0]scale=-1:-1[a];[1]scale=-1:-1[b];[a][b]hstack' $GIF_RES_COMPA
+  # hstack orginal and residual gifs
+  ffmpeg -y -i $GIF_OBS -i $GIF_RES_RPRJ -filter_complex '[0]scale=-1:-1[a];[1]scale=-1:-1[b];[a][b]hstack[v];[v]palettegen=max_colors=256:stats_mode=full[p]' -map '[p]' -update 1 -frames:v 1 palette.png
+  ffmpeg -y -i $GIF_OBS -i $GIF_RES_RPRJ -i palette.png -filter_complex '[0]scale=-1:-1[a];[1]scale=-1:-1[b];[a][b]hstack[v];[v][2:v]paletteuse=dither=none' -plays 0 $GIF_RES_COMPA
   rm -r reprojected
 else
   echo "> No residual reprojection"
