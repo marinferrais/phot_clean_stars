@@ -277,11 +277,12 @@ else
   echo "> Initial pp run skipped"
 fi
 
+POS_FILE=$WRK_DIR/positions.dat
 # Create gif of original images
 if [[ -z "$GIFPOSX" || -z "$GIFPOSY" ]]; then
-  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_OBS -wt -sctype $SCALING_TYPE
+  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_OBS -wt -sctype $SCALING_TYPE -aprad $APRAD_TAR -app $POS_FILE
 else
-  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_OBS -wt -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
+  gif_maker.py $FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -n $GIF_OBS -wt -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE -aprad $APRAD_TAR -app $POS_FILE
 fi
 
 # Create median subtracted images (residuals) to remove stars
@@ -311,9 +312,9 @@ fi
 if [[ "$REPROJ" == true ]]; then
   fits_reproject.py ../$FITS_FILES -f2 $FITS_FILES -s
   if [[ -z "$GIFPOSX" || -z "$GIFPOSY" ]]; then
-    gif_maker.py reprojected/$FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -sctype $SCALING_TYPE
+    gif_maker.py reprojected/$FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -sctype $SCALING_TYPE -aprad $APRAD_TAR -app $POS_FILE
   else
-    gif_maker.py reprojected/$FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE
+    gif_maker.py reprojected/$FITS_FILES -f $GIFF -sz $GIFSZ -nw -dl $GIFDL -d ../ -n $GIF_RES_RPRJ -p $GIFPOSX $GIFPOSY -sctype $SCALING_TYPE -aprad $APRAD_TAR -app $POS_FILE
   fi
   ffmpeg -y -i $GIF_OBS -i $GIF_RES_RPRJ -filter_complex '[0]scale=-1:-1[a];[1]scale=-1:-1[b];[a][b]hstack' $GIF_RES_COMPA
   rm -r reprojected
@@ -338,7 +339,6 @@ pp_calibrate $FITS_FILES -instrumental
 #pp_manident $FITS_FILES -zoom $ZOOM
 
 # Extract photometry from the original images positions
-POS_FILE=$WRK_DIR/positions.dat
 pp_distill $FITS_FILES -mf $MAXFLAG -target manual -positions $POS_FILE
 
 
