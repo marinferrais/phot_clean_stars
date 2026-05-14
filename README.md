@@ -6,7 +6,7 @@ Clean star contamination in asteroid photometry
 
 These scripts aim at correcting star contamination when an asteroid moves
 close to background stars. Photometry must be done with [Photometry Pipeline (PP)](https://github.com/marinferrais/photometrypipeline).
-A normal PP run is used to obtain the ZP for each images. Then the star are removed by taking the median of images before and after each images and subtracting it. The asteroid instrumental magnitudes are obtained from these star cleaned images, making use of PP [manual identification tool](https://photometrypipeline.readthedocs.io/en/latest/functions.html#pp_manident).
+A normal PP run is used to obtain the ZP for each images. Then the star are removed by taking the median of images before and after each images and subtracting it. The asteroid instrumental magnitudes are obtained from these star cleaned images, using the apertures position used for the original images.
 
 
 ## Installation
@@ -65,7 +65,8 @@ Some are related to PP:
 
 Some are related to the diagnostic gifs:
 ```text
--sz # gif size in pixel
+-sz # cutout size in pixel
+-gsz # gif size in pixel
 -df # delay between frame (s)
 ```
 
@@ -75,19 +76,10 @@ Some are related to the star cleaning:
 -p # number of images before of after not used in the median, very important for slow targets
 ```
 
-Some are related to the manual identification:
-```text
--z # image zoom for the manual identification
-```
-
 To not redo an existing PP run use:
 ```text
 -s_pp
 ```
-
-### Manual identification:
-Use a and d keys to browse images, click on the asteroid, when the interpolation identifies the asteroid on all images, use q to quit. More details [here](https://photometrypipeline.readthedocs.io/en/latest/functions.html#pp_manident).
-
 
 
 
