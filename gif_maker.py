@@ -113,9 +113,13 @@ def get_images(fnames, size=None, position=None, coordinates=None, bkgsub=False,
                                                     names=True)
 
     ap_pos_list = []
+    aprads = []
     get_pos = False # not sure what this is for ...
+    coord_horizons = []
     for i, fname in tqdm(enumerate(fnames), desc='Prepare images'):
         data, header, fits_infos = get_fits_infos(fname)
+        if 'APRAD' in header.keys():
+            aprads.append(header['APRAD'])
         wcs = WCS(header)
         if coordinates and get_pos:
             x, y = wcs.world_to_pixel(SkyCoord(ra=ra, dec=dec, unit="deg"))
@@ -165,12 +169,12 @@ def get_images(fnames, size=None, position=None, coordinates=None, bkgsub=False,
         data_list.append(data)
         fits_infos_list.append(fits_infos)
 
-    return data_list, fits_infos_list, pos_ast_list, ap_pos_list
+    return data_list, fits_infos_list, pos_ast_list, ap_pos_list, aprads
 
 
 def arrays_to_gif_mpl(frames, gif_path, fits_infos_list, duration=100, loop=0, 
                        cmap='gray', gif_size=None, dpi=100,
-                       ap_pos_list=None, aprad=7,
+                       ap_pos_list=None, aprads=None,
                        write_text=None):
     """
     Create a GIF using matplotlib's imshow renderer — same rendering as imshow.
@@ -208,7 +212,7 @@ def arrays_to_gif_mpl(frames, gif_path, fits_infos_list, duration=100, loop=0,
         if ap_pos_list:
             from matplotlib.patches import Circle
             x, y = ap_pos_list[i][0], ap_pos_list[i][1]
-            circle = Circle((x, y), aprad, color='C0', fill=False, linewidth=1)
+            circle = Circle((x, y), aprads[i], color='C0', fill=False, linewidth=1)
             ax.add_patch(circle)
 
         ax.axis('off')
@@ -253,7 +257,7 @@ def scale_images(data_list, scaling_type='z_scale', z=0.05):
 def make_gif(fnames, destination, filename, z=0.05, delay=0.2,
                  size=None, gif_size=None, position=None, coordinates=None, bkgsub=False,
                  write_text=False, scaling_type='zscale', get_ast_pos=True,
-                 file_ap_pos=None, aprad=7):
+                 file_ap_pos=None, aprad=None):
     """
     """
 
@@ -276,7 +280,7 @@ def make_gif(fnames, destination, filename, z=0.05, delay=0.2,
     # Image scaling
     data_scaled_list = scale_images(data_list, scaling_type=scaling_type, z=z)
 
-    arrays_to_gif_mpl(data_scaled_list, gif_path, fits_infos_list, duration=delay*1000, gif_size=gif_size, ap_pos_list=ap_pos_list, aprad=aprad, write_text=write_text)
+    arrays_to_gif_mpl(data_scaled_list, gif_path, fits_infos_list, duration=delay*1000, gif_size=gif_size, ap_pos_list=ap_pos_list, aprads=aprads, write_text=write_text)
 
     
     print(f"> Gif saved to {gif_path}")
@@ -325,7 +329,7 @@ if __name__ == '__main__':
     parser.add_argument("-app", "--file_ap_pos", help='output gif name',
                         default="", type=str)
     parser.add_argument("-aprad", "--aprad", help='Photometric aperture radius',
-                        default=7, type=float)
+                        default=None, type=float)
 
 
     args = parser.parse_args()
