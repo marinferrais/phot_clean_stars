@@ -275,7 +275,10 @@ def make_gif(fnames, destination, filename, z=0.05, delay=0.2,
     get_images_res = get_images(fnames,
                                 size=size, position=position, coordinates=coordinates,
                                 bkgsub=bkgsub, get_ast_pos=get_ast_pos, file_ap_pos=file_ap_pos)
-    data_list, fits_infos_list, pos_list, ap_pos_list = get_images_res
+    data_list, fits_infos_list, pos_list, ap_pos_list, aprads = get_images_res
+
+    if aprad: # overwrite headers aprad if one is given
+        aprads = [aprad] * len(fnames)
 
     # Image scaling
     data_scaled_list = scale_images(data_list, scaling_type=scaling_type, z=z)
