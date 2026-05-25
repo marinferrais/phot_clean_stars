@@ -22,6 +22,8 @@ from pathlib import Path
 from astropy.wcs import WCS
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
+from photutils.detection import DAOStarFinder
+from astropy.stats import sigma_clipped_stats
 
 # Plotting
 import matplotlib.pyplot as plt
@@ -49,7 +51,9 @@ def get_eph(target, obs, jd, verbose=False): #TODO: put in toolbox
 
     """
     # Parse target name
-    target = rocks.id(target)[0]
+    rocksid = rocks.id(target)[0]
+    if rocksid is not None:
+        target = rocksid
     if verbose:
         print(target,obs,jd)
     obj = Horizons(id=target, location=obs, epochs=jd, id_type='smallbody')
@@ -211,8 +215,15 @@ def get_astpx(data, fits_infos, wcs, centroid=False, display=False):
         mask[int(y)-10:int(y)+10, int(x)-10:int(x)+10] = False
         #plt.imshow(np.ma.masked_array(data, mask), origin='lower')
         #plt.show()
-        x, y = centroid_com(data, mask=mask)
+        #x, y = centroid_com(data, mask=mask)
         #print(f'{x:.2f} {y:.2f}')
+
+        nsig = 3
+        fhwm = 2
+        mean, median, std = sigma_clipped_stats(data[mask])
+        daofind = DAOStarFinder(fwhm=fhwm, threshold=nsig*std).find_stars(data-np.median(data), mask=mask)
+        i = np.argmax(daofind['peak'])
+        x, y = daofind['xcentroid'][i], daofind['ycentroid'][i]
 
     if display:
         plot_ast(data, wcs, x, y, target=target)
