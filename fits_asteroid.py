@@ -35,10 +35,30 @@ from image_scaling import z_scale
 from ut2jd import ut2jd
 import rocks
 from IAUcodes import tel2code
+import re
 
 #
 # --- FUNCTIONS ---------------------------------------------------------------
 #
+
+def get_eph_comets(error_msg, id, location, epochs, id_type):
+    # Parse record numbers and epochs from error message
+    records = re.findall(r'(\d{8})\s+(\d{4})\s', error_msg)
+
+    if not records:
+        raise ValueError(f"Could not parse ambiguous target error: {error_msg}")
+
+    # Select record with highest epoch year
+    best_record = max(records, key=lambda x: int(x[1]))
+    record_id = best_record[0]
+
+    print(f"Ambiguous target '{id}' — using most recent record "
+          f"#{record_id} (epoch {best_record[1]})")
+
+    # Re-query using the specific record number
+    obj = Horizons(id=record_id, location=location, epochs=epochs, id_type=id_type)
+    eph = obj.ephemerides()
+    return eph
 
 def get_eph(target, obs, jd, verbose=False): #TODO: put in toolbox
     """
@@ -54,6 +74,8 @@ def get_eph(target, obs, jd, verbose=False): #TODO: put in toolbox
     rocksid = rocks.id(target)[0]
     if rocksid is not None:
         target = rocksid
+    else:
+        target = target.lstrip('0')
     if verbose:
         print(target,obs,jd)
     obj = Horizons(id=target, location=obs, epochs=jd, id_type='smallbody')
@@ -199,7 +221,16 @@ def get_astpx(data, fits_infos, wcs, centroid=False, display=False):
 
     # Get ephemerides
     target, observatory, jd = fits_infos
-    eph = get_eph(target, observatory, jd)
+    try:
+        eph = get_eph(target, observatory, jd)
+    except Exception as e:
+        error_msg = str(e)
+        # Check if it's an ambiguity error
+        if 'Ambiguous target name' in error_msg:
+            eph = get_eph_comets(error_msg, target, observatory, jd, 'smallbody')
+        else:
+            raise
+
     # Get x, y asteroid position from RA/DEC coordinates
     ra, dec = eph['RA'], eph['DEC']
     x, y = wcs.world_to_pixel(SkyCoord(ra=ra, dec=dec))
