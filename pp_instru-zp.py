@@ -65,10 +65,11 @@ def combine_instru_zp(file_instru, file_zp, outfile='', targetname=None,
     t.rename_column('[7]', 'filter')
     t.rename_column('[5]', 'texp')
     t['band'] = t['filter']
-    t['observatory'] = obs_code[t['[9]'][0]]
+    t['observatory'] = obs_code.get(t['[9]'][0], t['[9]'][0])
     t['targetname'] = targetname
     t['mag'].format = '%.4f'
     t['err_abs'].format = '%.4f'
+    t['err_pho'].format = '%.4f'
     t = t['targetname', 'epoch', 'mag', 'err_abs', 'err_pho', 'filter', 'band', 'texp', 'observatory']
 
     t['err_abs'][np.where(t['mag'] > 100)] = 0.0
@@ -79,7 +80,7 @@ def combine_instru_zp(file_instru, file_zp, outfile='', targetname=None,
 
     if outfile == '':
         date = Time(int(t['epoch'][0])+0.3, format='jd').isot.split('T')[0]
-        outfile = f"{targetname}_{obs_abrv[t_in['[9]'][0]]}_{date}_{t['band'][0]}.obs"
+        outfile = f"{targetname}_{obs_abrv.get(t_in['[9]'][0],t_in['[9]'][0])}_{date}_{t['band'][0]}.obs"
     print(f'> Saving table with calib mags to : {outfile}')
     t.write(outfile, format='ascii.rst', overwrite=True, comment=False)
 
