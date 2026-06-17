@@ -169,7 +169,12 @@ def fix_pp_header(header):
 
     return header
 
-def get_fits_infos(filename, target=None, observatory=None, jd=None, fix_hdr=True):
+def get_fits_infos(filename, target=None, observatory=None, jd=None, fix_hdr=True, no_warnings=False):
+    if no_warnings:
+        import warnings
+        from astropy.utils.exceptions import AstropyWarning
+        warnings.simplefilter('ignore', category=AstropyWarning)
+
     hdul = fits.open(filename)[0]
     data = hdul.data
     header = hdul.header
