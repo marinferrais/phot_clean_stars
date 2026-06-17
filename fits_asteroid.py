@@ -76,6 +76,7 @@ def get_eph(target, obs, jd, verbose=False): #TODO: put in toolbox
         target = rocksid
     else:
         target = target.lstrip('0')
+        target = target.replace('_', ' ')
     if verbose:
         print(target,obs,jd)
     obj = Horizons(id=target, location=obs, epochs=jd, id_type='smallbody')
@@ -247,8 +248,9 @@ def get_astpx(data, fits_infos, wcs, centroid=False, display=False):
     #print(f'{x:.2f} {y:.2f}')
     if centroid:
         from photutils.centroids import centroid_com
+        box_size = 40
         mask = np.ones_like(data, dtype=bool)
-        mask[int(y)-10:int(y)+10, int(x)-10:int(x)+10] = False
+        mask[int(y)-box_size:int(y)+box_size, int(x)-box_size:int(x)+box_size] = False
         #plt.imshow(np.ma.masked_array(data, mask), origin='lower')
         #plt.show()
         #x, y = centroid_com(data, mask=mask)
