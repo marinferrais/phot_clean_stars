@@ -36,7 +36,9 @@ def combine_instru_zp(file_instru, file_zp, outfile='', targetname=None,
         #file_zp = list(file_zp.parent.glob(f'photometry_*{targetname[:4]}_{targetname[4:]}_.dat'))[0]
         file_zp = list(file_zp.parent.glob(f'photometry_*_.dat'))[0]
         if not file_zp.exists():
-            raise FileNotFoundError(f"[Errno 2] No such file or directory: {file_zp}")
+            file_zp = list(file_zp.parent.glob(f'photometry_*_*.dat'))[0]            
+            if not file_zp.exists():
+                raise FileNotFoundError(f"[Errno 2] No such file or directory: {file_zp}")
 
 
     obs_code = {'TRAPPIST' : 'I40', 'ACP->NTM': 'Z53', 'Artemis':'Z25', 'ACP->Artemis':'Z25', 'Spacewatch_0.9-m_f/3_prime_focus':'691', 'RCOS':'W39'}
