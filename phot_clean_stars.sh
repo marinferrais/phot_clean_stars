@@ -331,6 +331,12 @@ else
 fi
 
 #
+# TEST : run psf phot
+#
+#python /media/petrescu/D74C-CB64/marin/scripts/phot_psf.py $FITS_FILES -t $TARGETNAME
+#pp_instru-zp.py $WRK_DIR"/residuals/photometry_"$TARGETNAME"_psf.dat" -zp $PHO_ZP -v -o 'phot_psf.obs' -t $TARGETNAME
+
+#
 # Run PP on the residual frames with manual identification of the target
 #
 
